@@ -1,11 +1,28 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
+#ifndef _MSC_VER
+    #include <unistd.h>
+    #include <getopt.h>
+#else
+    #ifndef _SSIZE_T_DEFINED
+        #ifdef  _WIN64
+            typedef __int64    ssize_t;
+        #else
+            typedef _W64 int   ssize_t;
+        #endif
+
+        #define _SSIZE_T_DEFINED
+    #endif
+
+
+    #include <io.h>
+    #include "heatshrink\getopt.h"
+#endif
+
 #include <stdint.h>
 #include <assert.h>
 #include <string.h>
 #include <fcntl.h>
-#include <getopt.h>
 
 #include "heatshrink_encoder.h"
 #include "heatshrink_decoder.h"
@@ -244,7 +261,7 @@ static void close_and_report(config *cfg) {
 
 static int encoder_sink_read(config *cfg, heatshrink_encoder *hse,
         uint8_t *data, size_t data_sz) {
-    size_t out_sz = 4096;
+    #define  out_sz 4096
     uint8_t out_buf[out_sz];
     memset(out_buf, 0, out_sz);
     size_t sink_sz = 0;
@@ -313,7 +330,8 @@ static int decoder_sink_read(config *cfg, heatshrink_decoder *hsd,
     io_handle *out = cfg->out;
     size_t sink_sz = 0;
     size_t poll_sz = 0;
-    size_t out_sz = 4096;
+    #undef out_sz
+#define out_sz 4096
     uint8_t out_buf[out_sz];
     memset(out_buf, 0, out_sz);
 
